@@ -26,6 +26,7 @@ const loginPage = path.join(__dirname, 'login.html');
 const internHubPage = path.join(__dirname, 'index.html');
 const dataDirectory = path.resolve(process.env.INTERNHUB_DATA_DIR || path.join(__dirname, 'data'));
 const internsFile = path.join(dataDirectory, 'interns.json');
+const seedInternsFile = path.join(__dirname, 'data', 'seed-interns.json');
 
 app.disable('x-powered-by');
 if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
@@ -179,7 +180,23 @@ async function readInternDataset() {
     if (!records) throw new Error('The persisted intern dataset has an invalid format.');
     return records;
   } catch (error) {
-    if (error.code === 'ENOENT') return null;
+    if (error.code === 'ENOENT') {
+      try {
+        const seedRaw = await fs.promises.readFile(seedInternsFile, 'utf8');
+        const seedData = JSON.parse(seedRaw);
+        const seedRecords = normalizeInternRecords(seedData.students);
+        if (seedRecords && seedRecords.length > 0) {
+          await writeInternDataset(seedRecords);
+          console.log(`[InternHub] Auto-initialized dataset from seed with ${seedRecords.length} records.`);
+          return seedRecords;
+        }
+      } catch (seedError) {
+        if (seedError.code !== 'ENOENT') {
+          console.warn('[InternHub] Could not load seed dataset:', seedError.message);
+        }
+      }
+      return null;
+    }
     throw error;
   }
 }
@@ -482,6 +499,16 @@ app.use((error, _req, res, _next) => {
   res.status(status).send(status === 413 ? 'Request body is too large.' : status === 400 ? 'The request is invalid.' : 'An unexpected server error occurred.');
 });
 
-app.listen(port, host, () => {
+app.listen(port, host, async () => {
   console.log(`InternHub is listening on ${host}:${port}`);
+  try {
+    const records = await readInternDataset();
+    if (records) {
+      console.log(`[InternHub] Connected to backend dataset (${records.length} records loaded).`);
+    } else {
+      console.log('[InternHub] Backend dataset ready (empty or awaiting records).');
+    }
+  } catch (err) {
+    console.error('[InternHub] Failed to initialize backend dataset:', err.message);
+  }
 });
