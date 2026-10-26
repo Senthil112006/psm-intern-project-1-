@@ -49,8 +49,8 @@
 <body class="flex flex-col min-h-screen">
   <header class="sticky top-0 z-40 border-b border-line bg-white/90 backdrop-blur">
     <div class="mx-auto flex h-[68px] max-w-[1100px] items-center justify-between gap-4 px-4 sm:px-7">
-      <a href="/" class="flex items-center gap-3 group text-decoration-none" title="PSM InternHub">
-        <span class="grid h-10 w-10 place-items-center rounded-xl bg-moss text-[11px] font-extrabold tracking-wide text-white transition-transform group-hover:scale-105">PSM</span>
+      <a href="./" class="flex items-center gap-3 group text-decoration-none" title="PSM InternHub">
+        <img src="assets/logo.png" alt="PSM logo" class="h-10 w-10 rounded-xl object-contain">
         <span class="leading-tight">
           <strong class="text-[15px] tracking-tight">Intern<span class="text-moss">Hub</span></strong>
           <span class="block text-[9px] font-semibold uppercase tracking-[.15em] text-muted">Problem Solving Minds</span>
@@ -88,7 +88,7 @@
       </div>
       <h2 class="text-base font-bold">Profile Unavailable</h2>
       <p class="mt-1 text-[13px] text-rose-700">This student profile link is either invalid, expired, or the student ID was not found.</p>
-      <a href="/" class="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-rose-700 px-4 py-2 text-[12px] font-bold text-white hover:bg-rose-800 transition">Return to InternHub Home</a>
+      <a href="./" class="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-rose-700 px-4 py-2 text-[12px] font-bold text-white hover:bg-rose-800 transition">Return to InternHub Home</a>
     </div>
 
     <!-- Loading Skeleton -->
@@ -307,21 +307,77 @@
     }
 
     async function loadProfile() {
+      // 1. Resolve student identifier from query params, hash, or URL pathname
       const path = window.location.pathname.replace(/\/+$/, '');
-      const match = path.match(/^\/profile\/([^/]+)$/);
-      if (!match) {
+      const pathMatch = path.match(/\/profile\/([^/]+)$/);
+      const urlParams = new URLSearchParams(window.location.search);
+      const hashMatch = window.location.hash.match(/^#(?:intern|profile)=([^&]+)/);
+
+      let identifier = '';
+      if (urlParams.get('id')) {
+        identifier = urlParams.get('id').trim();
+      } else if (urlParams.get('intern')) {
+        identifier = urlParams.get('intern').trim();
+      } else if (hashMatch) {
+        identifier = decodeURIComponent(hashMatch[1]).trim();
+      } else if (pathMatch) {
+        identifier = decodeURIComponent(pathMatch[1]).trim();
+      }
+
+      let profile = null;
+
+      // 2. Try backend API if running with active Node.js server
+      const isStaticHost = window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
+      if (!isStaticHost && identifier) {
+        try {
+          const response = await fetch(`/api/public-profile/${encodeURIComponent(identifier)}`, { cache: 'no-store' });
+          if (response.ok) {
+            profile = await response.json();
+          }
+        } catch (apiErr) {
+          // Fall through to static fallback
+        }
+      }
+
+      // 3. Fallback to localStorage or bundled seed data (e.g. on GitHub Pages)
+      if (!profile) {
+        let studentsList = [];
+        try {
+          const saved = localStorage.getItem('psm-internhub-interns');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) studentsList = parsed;
+          }
+        } catch (lsErr) {}
+
+        if (studentsList.length === 0) {
+          try {
+            const seedUrl = new URL('data/seed-interns.json', window.location.href).href;
+            const res = await fetch(seedUrl);
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data.students)) studentsList = data.students;
+            }
+          } catch (seedErr) {}
+        }
+
+        if (studentsList.length > 0) {
+          if (identifier) {
+            profile = studentsList.find(s => s && typeof s.id === 'string' && s.id.toLowerCase() === identifier.toLowerCase());
+          }
+          if (!profile) {
+            profile = studentsList[0];
+          }
+        }
+      }
+
+      if (!profile) {
         document.getElementById('profileSkeleton').classList.add('hidden');
         document.getElementById('profileError').classList.remove('hidden');
         return;
       }
 
-      const identifier = decodeURIComponent(match[1]);
-
       try {
-        const response = await fetch(`/api/public-profile/${encodeURIComponent(identifier)}`, { cache: 'no-store' });
-        if (!response.ok) throw new Error(`Profile request failed with status ${response.status}.`);
-        const profile = await response.json();
-
         document.title = `${profile.name} - ${profile.role} | Verified Intern Portfolio`;
 
         // Basic Profile Info
