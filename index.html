@@ -52,7 +52,7 @@
   <header class="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur">
     <div class="site-header-inner mx-auto flex h-[68px] max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-7">
       <a href="#dashboard" onclick="switchTab('dashboard'); return false" class="flex shrink-0 items-center gap-3" aria-label="PSM InternHub home">
-        <img src="/assets/logo.png" alt="PSM logo" class="h-10 w-10 rounded-xl object-contain">
+        <img src="assets/logo.png" alt="PSM logo" class="h-10 w-10 rounded-xl object-contain">
         <span class="leading-tight"><strong class="text-[15px] tracking-tight">Intern<span class="text-moss">Hub</span></strong><span class="block text-[9px] font-semibold uppercase tracking-[.15em] text-muted">Problem Solving Minds</span></span>
       </a>
       <nav aria-label="Main navigation" class="site-nav no-scrollbar flex min-w-0 flex-1 justify-start gap-1 overflow-x-auto px-2 text-[12px] font-semibold">
@@ -350,47 +350,103 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ students: records })
         });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || `Dataset save failed (HTTP ${response.status}).`);
-        if (!Array.isArray(result.students)) throw new Error('The server returned an invalid saved dataset.');
-        try {
-          localStorage.setItem('psm-internhub-interns', JSON.stringify(result.students));
-        } catch (error) {
-          console.warn('The local dataset cache could not be updated; the server copy was saved.', error);
+        if (response.ok) {
+          const result = await response.json();
+          if (Array.isArray(result.students)) {
+            try {
+              localStorage.setItem('psm-internhub-interns', JSON.stringify(result.students));
+            } catch (error) {
+              console.warn('The local dataset cache could not be updated; the server copy was saved.', error);
+            }
+            datasetReady = true;
+            document.getElementById('datasetError').classList.add('hidden');
+            return true;
+          }
         }
+      } catch (error) {
+        // Continue to localStorage fallback (e.g. GitHub Pages static host)
+      }
+
+      try {
+        localStorage.setItem('psm-internhub-interns', JSON.stringify(records));
         datasetReady = true;
         document.getElementById('datasetError').classList.add('hidden');
         return true;
       } catch (error) {
         console.error('Student data could not be saved.', error);
-        document.getElementById('datasetError').textContent = `The shared dataset could not be saved. Your changes were not applied. ${error.message}`;
+        document.getElementById('datasetError').textContent = `The dataset could not be saved. ${error.message}`;
         document.getElementById('datasetError').classList.remove('hidden');
         return false;
       }
     }
 
     async function loadPersistentDataset() {
-      const response = await fetch('/api/interns', { cache: 'no-store' });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || `Dataset load failed (HTTP ${response.status}).`);
-      if (result.students === null) {
-        const initialRecords = loadSavedInterns();
-        if (!await persistInterns(initialRecords, true)) throw new Error('Could not initialize the permanent dataset.');
-        interns = initialRecords;
-      } else {
-        if (!Array.isArray(result.students)) throw new Error('The server returned an invalid dataset.');
-        const normalized = result.students.map(normalizeInternRecord).filter(Boolean);
-        if (normalized.length !== result.students.length || new Set(normalized.map(intern => intern.id)).size !== normalized.length) {
-          throw new Error('The server dataset contains invalid or duplicate intern records.');
+      // 1. Try server backend API (/api/interns)
+      try {
+        const response = await fetch('/api/interns', { cache: 'no-store' });
+        if (response.ok) {
+          const result = await response.json();
+          if (result.students === null) {
+            const initialRecords = loadSavedInterns();
+            if (!await persistInterns(initialRecords, true)) throw new Error('Could not initialize the permanent dataset.');
+            interns = initialRecords;
+          } else {
+            if (!Array.isArray(result.students)) throw new Error('The server returned an invalid dataset.');
+            const normalized = result.students.map(normalizeInternRecord).filter(Boolean);
+            if (normalized.length !== result.students.length || new Set(normalized.map(intern => intern.id)).size !== normalized.length) {
+              throw new Error('The server dataset contains invalid or duplicate intern records.');
+            }
+            interns = normalized;
+          }
+          datasetReady = true;
+          try {
+            localStorage.setItem('psm-internhub-interns', JSON.stringify(interns));
+          } catch (e) {}
+          selectedInternId = interns.some(intern => intern.id === selectedInternId) ? selectedInternId : (interns[0]?.id ?? null);
+          return;
         }
-        interns = normalized;
-        datasetReady = true;
-        try {
-          localStorage.setItem('psm-internhub-interns', JSON.stringify(interns));
-        } catch (error) {
-          console.warn('The local dataset cache could not be updated; the server copy remains available.', error);
-        }
+      } catch (apiErr) {
+        // Backend API is not available (e.g. GitHub Pages or static host)
       }
+
+      // 2. Check localStorage
+      try {
+        const saved = localStorage.getItem('psm-internhub-interns');
+        const parsed = saved ? JSON.parse(saved) : null;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const normalized = parsed.map(normalizeInternRecord).filter(Boolean);
+          if (normalized.length === parsed.length && new Set(normalized.map(i => i.id)).size === normalized.length) {
+            interns = normalized;
+            datasetReady = true;
+            selectedInternId = interns.some(intern => intern.id === selectedInternId) ? selectedInternId : (interns[0]?.id ?? null);
+            return;
+          }
+        }
+      } catch (lsErr) {}
+
+      // 3. Static host fallback: fetch data/seed-interns.json
+      try {
+        const staticResponse = await fetch('data/seed-interns.json');
+        if (staticResponse.ok) {
+          const seedData = await staticResponse.json();
+          if (Array.isArray(seedData.students)) {
+            const normalized = seedData.students.map(normalizeInternRecord).filter(Boolean);
+            if (normalized.length > 0) {
+              interns = normalized;
+              datasetReady = true;
+              try {
+                localStorage.setItem('psm-internhub-interns', JSON.stringify(interns));
+              } catch (e) {}
+              selectedInternId = interns.some(intern => intern.id === selectedInternId) ? selectedInternId : (interns[0]?.id ?? null);
+              return;
+            }
+          }
+        }
+      } catch (staticErr) {}
+
+      // 4. Default fallback
+      interns = defaultInterns.map(intern => normalizeInternRecord({ ...intern, skills: [...intern.skills] }));
+      datasetReady = true;
       selectedInternId = interns.some(intern => intern.id === selectedInternId) ? selectedInternId : (interns[0]?.id ?? null);
     }
 
@@ -496,6 +552,10 @@
 
     async function getProfileUrl(intern) {
       if (!intern || !intern.id) return '';
+      if (window.location.hostname.includes('github.io')) {
+        const path = window.location.pathname.replace(/\/+$/, '');
+        return `${window.location.origin}${path}/#intern=${encodeURIComponent(intern.id)}`;
+      }
       const base = getEffectiveBaseUrl();
       return new URL(`/profile/${encodeURIComponent(intern.id)}`, base).toString();
     }
