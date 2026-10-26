@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f4f6f2">
+  <meta name="theme-color" content="#ffffff">
   <title>PSM InternHub | Problem Solving Minds</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -17,12 +17,12 @@
       theme: {
         extend: {
           colors: {
-            ink: '#17211d',
-            moss: '#305b43',
-            leaf: '#dbe8d8',
-            paper: '#f4f6f2',
-            line: '#e2e7df',
-            muted: '#718078'
+            ink: '#1e1b4b',
+            moss: '#7c3aed',
+            leaf: '#ede9fe',
+            paper: '#ffffff',
+            line: '#e9d5ff',
+            muted: '#7c749b'
           },
           fontFamily: {
             sans: ['DM Sans', 'sans-serif'],
@@ -34,7 +34,7 @@
   </script>
   <style>
     :root { color-scheme: light; }
-    body { font-family: 'DM Sans', sans-serif; background: #f4f6f2; color: #17211d; }
+    body { font-family: 'DM Sans', sans-serif; background: #ffffff; color: #1e1b4b; }
     .font-mono { font-family: 'DM Mono', monospace; }
     .view-enter { animation: appear .24s ease-out both; }
     @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -52,7 +52,7 @@
   <header class="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur">
     <div class="site-header-inner mx-auto flex h-[68px] max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-7">
       <a href="#dashboard" onclick="switchTab('dashboard'); return false" class="flex shrink-0 items-center gap-3" aria-label="PSM InternHub home">
-        <span class="grid h-10 w-10 place-items-center rounded-xl bg-moss text-[11px] font-extrabold tracking-wide text-white">PSM</span>
+        <img src="/assets/logo.png" alt="PSM logo" class="h-10 w-10 rounded-xl object-contain">
         <span class="leading-tight"><strong class="text-[15px] tracking-tight">Intern<span class="text-moss">Hub</span></strong><span class="block text-[9px] font-semibold uppercase tracking-[.15em] text-muted">Problem Solving Minds</span></span>
       </a>
       <nav aria-label="Main navigation" class="site-nav no-scrollbar flex min-w-0 flex-1 justify-start gap-1 overflow-x-auto px-2 text-[12px] font-semibold">
@@ -64,7 +64,7 @@
       </nav>
       <div class="admin-label hidden shrink-0 items-center gap-2 lg:flex"><span class="h-2 w-2 rounded-full bg-moss"></span><span class="text-[11px] font-semibold text-ink">Super Admin</span></div>
       <form action="/logout" method="post" class="shrink-0">
-        <button type="submit" class="rounded-lg border border-line px-3 py-2 text-[11px] font-bold text-moss hover:bg-[#edf3eb]">Sign out</button>
+        <button type="submit" class="rounded-lg border border-line px-3 py-2 text-[11px] font-bold text-moss hover:bg-[#f5f3ff]">Sign out</button>
       </form>
     </div>
   </header>
@@ -96,7 +96,7 @@
 
     <section id="view-students" class="hidden space-y-6">
       <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p class="mb-2 text-[10px] font-bold uppercase tracking-[.18em] text-moss">People / Directory</p><h1 class="text-[27px] font-extrabold tracking-tight sm:text-[32px]">Intern directory</h1><p class="mt-1 text-[13px] text-muted">Records are saved in the shared server dataset. Export a backup for safekeeping.</p></div><div class="flex flex-wrap items-center gap-2"><button type="button" onclick="openAddIntern()" class="action-button"><i data-lucide="user-plus" class="h-4 w-4"></i><span>Add intern</span></button><button type="button" onclick="exportInterns()" class="action-button"><i data-lucide="download" class="h-4 w-4"></i><span>Export backup</span></button><button type="button" onclick="document.getElementById('backupUpload').click()" class="cancel-button border border-line"><i data-lucide="upload" class="mr-1 inline h-4 w-4"></i>Import backup</button><input id="backupUpload" type="file" accept="application/json,.json" class="hidden" onchange="importInterns(event)"><label class="relative block w-full sm:w-[300px]"><i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"></i><input type="search" id="studentSearch" oninput="filterStudents()" placeholder="Search name, ID, college, domain" class="field w-full pl-9"></label></div></div>
-      <div class="overflow-hidden rounded-xl border border-line bg-white"><div class="overflow-x-auto"><table class="w-full min-w-[950px] text-left text-[12px]" id="studentsTable"><thead class="bg-[#f7f9f6] text-[10px] uppercase tracking-wider text-muted"><tr><th class="px-4 py-3.5">Intern</th><th class="px-4 py-3.5">College / domain</th><th class="px-4 py-3.5">Role</th><th class="px-4 py-3.5">Mentor</th><th class="px-4 py-3.5 text-center">Days</th><th class="px-4 py-3.5 text-center">Score</th><th class="px-4 py-3.5 text-center">Status</th><th class="px-4 py-3.5 text-right">Actions</th></tr></thead><tbody id="internRows" class="divide-y divide-line"></tbody></table></div><p id="emptyState" class="hidden px-5 py-12 text-center text-[13px] text-muted">No interns match that search.</p></div>
+      <div class="overflow-hidden rounded-xl border border-line bg-white"><div class="overflow-x-auto"><table class="w-full min-w-[950px] text-left text-[12px]" id="studentsTable"><thead class="bg-[#faf8ff] text-[10px] uppercase tracking-wider text-muted"><tr><th class="px-4 py-3.5">Intern</th><th class="px-4 py-3.5">College / domain</th><th class="px-4 py-3.5">Role</th><th class="px-4 py-3.5">Mentor</th><th class="px-4 py-3.5 text-center">Days</th><th class="px-4 py-3.5 text-center">Score</th><th class="px-4 py-3.5 text-center">Status</th><th class="px-4 py-3.5 text-right">Actions</th></tr></thead><tbody id="internRows" class="divide-y divide-line"></tbody></table></div><p id="emptyState" class="hidden px-5 py-12 text-center text-[13px] text-muted">No interns match that search.</p></div>
       <p class="text-[11px] text-muted">Showing <span id="resultCount" class="font-semibold text-ink">0</span> student records</p>
     </section>
 
@@ -105,21 +105,39 @@
       <article class="overflow-hidden rounded-xl border border-line bg-white">
         <div class="grid gap-6 border-b border-line p-5 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:p-7">
           <img id="portfolioPhoto" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80" alt="Intern portrait" class="h-24 w-24 rounded-xl object-cover ring-1 ring-line sm:h-28 sm:w-28">
-          <div><span class="inline-flex items-center gap-1.5 rounded-full bg-[#eaf2e8] px-2.5 py-1 text-[10px] font-bold text-moss"><i data-lucide="badge-check" class="h-3.5 w-3.5"></i> PSM verified credential</span><h2 id="portfolioName" class="mt-2 text-[25px] font-extrabold tracking-tight">Aarav Sharma</h2><p id="portfolioRole" class="mt-1 text-[13px] font-semibold text-moss"></p><p id="portfolioCollege" class="mt-1 text-[12px] text-muted"></p></div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-[#ede9fe] px-2.5 py-1 text-[10px] font-bold text-moss"><i data-lucide="badge-check" class="h-3.5 w-3.5"></i> PSM verified credential</span>
+              <a id="portfolioGithub" href="#" target="_blank" rel="noopener noreferrer" class="hidden inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-2.5 py-1 text-[10px] font-bold text-ink hover:bg-[#f5f3ff] hover:text-moss transition-colors shadow-sm" title="View GitHub Profile"><i data-lucide="github" class="h-3 w-3"></i><span>GitHub</span></a>
+            </div>
+            <h2 id="portfolioName" class="mt-2 text-[25px] font-extrabold tracking-tight">Aarav Sharma</h2>
+            <p id="portfolioRole" class="mt-1 text-[13px] font-semibold text-moss"></p>
+            <p id="portfolioCollege" class="mt-1 text-[12px] text-muted"></p>
+          </div>
           <div class="border-t border-line pt-4 sm:border-l sm:border-t-0 sm:pl-7 sm:pt-0"><p class="text-[10px] font-bold uppercase tracking-wider text-muted">Composite score</p><p id="portfolioScore" class="mt-1 text-[34px] font-extrabold leading-none">94.5</p><p id="portfolioGrade" class="mt-1 text-[11px] font-bold text-moss"></p></div>
         </div>
-        <div class="grid md:grid-cols-[1fr_210px]">
+        <div class="grid md:grid-cols-[1fr_240px]">
           <div class="p-5 sm:p-7"><p class="text-[10px] font-bold uppercase tracking-wider text-muted">Capstone project</p><h3 id="portfolioProject" class="mt-2 text-[19px] font-extrabold text-moss">PSM TalentPulse - AI Candidate Match Engine</h3><p id="portfolioDescription" class="mt-2 max-w-2xl text-[13px] leading-6 text-[#526159]"></p><div id="portfolioSkills" class="mt-4 flex flex-wrap gap-2"></div></div>
-          <aside class="flex flex-col items-center justify-center border-t border-line bg-[#f8faf7] p-5 md:border-l md:border-t-0"><p class="mb-3 text-[11px] font-bold">Scan to open this profile</p><div id="portfolioQr" class="rounded-lg bg-white p-2 shadow-sm"></div><p id="portfolioQrLabel" class="mt-2 max-w-full break-all text-center font-mono text-[9px] text-muted"></p><p id="qrHostingNotice" class="mt-2 max-w-[190px] text-center text-[9px] leading-4 text-muted">The page must be hosted at a public HTTPS address for phone scanning.</p></aside>
+          <aside class="flex flex-col items-center justify-center border-t border-line bg-[#faf8ff] p-5 md:border-l md:border-t-0">
+            <p class="mb-2 text-[11px] font-bold text-ink">Individual Profile QR</p>
+            <div id="portfolioQr" class="rounded-lg bg-white p-2 shadow-sm border border-line"></div>
+            <span id="portfolioQrLabel" class="hidden"></span>
+            <div class="mt-3 flex flex-wrap justify-center gap-1.5 w-full">
+              <button type="button" onclick="copySelectedProfileUrl()" class="rounded-md border border-line bg-white px-2 py-1 text-[10px] font-bold text-moss hover:bg-[#f5f3ff]">Copy</button>
+              <button type="button" onclick="downloadSelectedQrCode()" class="rounded-md bg-moss px-2 py-1 text-[10px] font-bold text-white hover:bg-[#6d28d9]">Save PNG</button>
+              <button type="button" onclick="openSelectedProfileTab()" class="rounded-md border border-line bg-white px-2 py-1 text-[10px] font-bold text-ink hover:bg-[#f5f3ff]">Open</button>
+            </div>
+            <p id="qrHostingNotice" class="mt-2 max-w-[210px] text-center text-[9px] leading-4 text-muted">Scan to open this student's verified profile directly on mobile.</p>
+          </aside>
         </div>
       </article>
     </section>
 
     <section id="view-idcard" class="hidden space-y-6">
       <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p class="mb-2 text-[10px] font-bold uppercase tracking-[.18em] text-moss">Credential / Printable pass</p><h1 class="text-[27px] font-extrabold tracking-tight sm:text-[32px]">Intern ID card</h1><p class="mt-1 text-[13px] text-muted">Print a scannable identity card for the selected intern.</p></div><div class="flex flex-wrap items-center gap-2"><select id="idcardSelect" onchange="selectIntern(this.value)" class="field min-w-[180px]"></select><button type="button" onclick="openEditIntern()" class="action-button"><i data-lucide="pencil" class="h-4 w-4"></i><span>Edit intern</span></button><button type="button" onclick="window.print()" class="action-button"><i data-lucide="printer" class="h-4 w-4"></i><span>Print card</span></button></div></div>
-      <div class="flex justify-center bg-[#e9eee7] p-5 sm:p-10"><article id="idCard" class="w-full max-w-[370px] overflow-hidden rounded-2xl border border-[#d8e2d7] bg-white shadow-lg">
-        <div class="flex items-center justify-between bg-moss px-5 py-4 text-white"><div class="flex items-center gap-2.5"><span class="grid h-8 w-8 place-items-center rounded-lg border border-white/25 text-[9px] font-extrabold">PSM</span><span class="text-[13px] font-bold">InternHub</span></div><span class="text-[9px] font-bold uppercase tracking-[.15em] text-[#dcebd7]">Official ID</span></div>
-        <div class="p-5"><div class="flex items-center gap-4"><img id="idcardPhoto" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80" alt="Intern portrait" class="h-[76px] w-[76px] rounded-xl object-cover"><div class="min-w-0"><h2 id="idcardName" class="text-[16px] font-extrabold"></h2><p id="idcardId" class="mt-1 break-all font-mono text-[10px] font-semibold text-moss"></p><p id="idcardRole" class="mt-1 text-[11px] font-semibold"></p><p id="idcardDomain" class="mt-0.5 text-[10px] text-muted"></p></div></div><div class="mt-4 flex justify-between border-y border-line py-3 text-[10px]"><span class="text-muted">Batch <strong class="ml-1 text-ink">Summer 2026</strong></span><span class="text-muted">Status <strong id="idcardStatus" class="ml-1 text-moss"></strong></span></div><div class="mt-4 flex flex-col items-center gap-2 rounded-xl bg-[#f4f7f2] p-4 text-center"><div><p class="text-[11px] font-bold">Scan to open student profile</p><p class="mt-1 text-[9px] text-muted">Official PSM portfolio</p></div><div id="idcardQr" class="rounded-md bg-white p-2"></div></div></div>
+      <div class="flex justify-center bg-[#f5f3ff] p-5 sm:p-10"><article id="idCard" class="w-full max-w-[370px] overflow-hidden rounded-2xl border border-[#ddd6fe] bg-white shadow-lg">
+        <div class="flex items-center justify-between bg-moss px-5 py-4 text-white"><div class="flex items-center gap-2.5"><span class="grid h-8 w-8 place-items-center rounded-lg border border-white/25 text-[9px] font-extrabold">PSM</span><span class="text-[13px] font-bold">InternHub</span></div><span class="text-[9px] font-bold uppercase tracking-[.15em] text-[#ede9fe]">Official ID</span></div>
+        <div class="p-5"><div class="flex items-center gap-4"><img id="idcardPhoto" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80" alt="Intern portrait" class="h-[76px] w-[76px] rounded-xl object-cover"><div class="min-w-0"><h2 id="idcardName" class="text-[16px] font-extrabold"></h2><p id="idcardId" class="mt-1 break-all font-mono text-[10px] font-semibold text-moss"></p><p id="idcardRole" class="mt-1 text-[11px] font-semibold"></p><p id="idcardDomain" class="mt-0.5 text-[10px] text-muted"></p></div></div><div class="mt-4 flex justify-between border-y border-line py-3 text-[10px]"><span class="text-muted">Batch <strong class="ml-1 text-ink">Summer 2026</strong></span><span class="text-muted">Status <strong id="idcardStatus" class="ml-1 text-moss"></strong></span></div><div class="mt-4 flex flex-col items-center gap-2 rounded-xl bg-[#faf8ff] p-4 text-center"><div><p class="text-[11px] font-bold">Scan to open student profile</p><p class="mt-1 text-[9px] text-muted">Official PSM portfolio</p></div><div id="idcardQr" class="rounded-md bg-white p-2"></div></div></div>
       </article></div>
     </section>
 
@@ -140,7 +158,7 @@
           <label class="edit-field sm:col-span-2">Mentor review<textarea id="evaluatorReview" rows="3" maxlength="2000"></textarea></label>
           <label class="edit-field sm:col-span-2">Evaluation notes<textarea id="evaluatorEvaluation" rows="3" maxlength="2000"></textarea></label>
         </div>
-        <div class="mx-5 mb-5 flex flex-wrap items-center justify-between gap-4 rounded-lg bg-[#edf3eb] p-4 sm:mx-6 sm:mb-6 sm:p-5"><div><p class="text-[10px] font-bold uppercase tracking-wider text-moss">Overall score</p><p id="res_grade" class="mt-1 text-[12px] font-bold">Grade --</p><p id="scoreError" class="mt-1 hidden text-[11px] font-semibold text-rose-700">Scores must be between 0 and 100.</p><p id="evaluationSaveStatus" class="mt-1 text-[11px] text-muted" aria-live="polite"></p></div><div class="flex items-center gap-3"><p id="res_score" class="font-mono text-[32px] font-medium leading-none">0.0</p><button type="button" onclick="saveEvaluation()" class="action-button">Save evaluation</button></div></div>
+        <div class="mx-5 mb-5 flex flex-wrap items-center justify-between gap-4 rounded-lg bg-[#faf8ff] border border-line p-4 sm:mx-6 sm:mb-6 sm:p-5"><div><p class="text-[10px] font-bold uppercase tracking-wider text-moss">Overall score</p><p id="res_grade" class="mt-1 text-[12px] font-bold">Grade --</p><p id="scoreError" class="mt-1 hidden text-[11px] font-semibold text-rose-700">Scores must be between 0 and 100.</p><p id="evaluationSaveStatus" class="mt-1 text-[11px] text-muted" aria-live="polite"></p></div><div class="flex items-center gap-3"><p id="res_score" class="font-mono text-[32px] font-medium leading-none">0.0</p><button type="button" onclick="saveEvaluation()" class="action-button">Save evaluation</button></div></div>
       </div>
     </section>
   </main>
@@ -177,42 +195,102 @@
         <label class="edit-field sm:col-span-2">Capstone project<input name="project" maxlength="160"></label>
         <label class="edit-field sm:col-span-2">Project description<textarea name="description" rows="3" maxlength="500"></textarea></label>
         <label class="edit-field sm:col-span-2">Skills, comma separated<input name="skills" placeholder="React, TypeScript, Node.js"></label>
+        <label class="edit-field sm:col-span-2">GitHub profile / repository URL<input name="github" type="url" placeholder="https://github.com/username"></label>
         <p id="editError" class="hidden text-[11px] font-semibold text-rose-700 sm:col-span-2" role="alert"></p>
       </div>
       <div class="flex justify-end gap-2 border-t border-line px-5 py-4 sm:px-6"><button type="button" onclick="closeEditIntern()" class="cancel-button">Cancel</button><button id="saveInternButton" type="submit" class="action-button">Save changes</button></div>
     </form>
   </dialog>
 
+  <dialog id="studentQrDialog" class="edit-dialog w-[min(520px,calc(100%-24px))] rounded-2xl border border-line bg-white p-0 text-ink shadow-2xl backdrop:bg-ink/40">
+    <div class="flex items-start justify-between border-b border-line px-5 py-4 sm:px-6">
+      <div>
+        <h2 class="text-[17px] font-extrabold flex items-center gap-2">
+          <i data-lucide="qr-code" class="h-4 w-4 text-moss"></i>
+          <span>Student Profile QR Code</span>
+        </h2>
+        <p class="mt-0.5 text-[11px] text-muted">Scan to open this student's individual verified portfolio.</p>
+      </div>
+      <button type="button" onclick="closeStudentQrDialog()" class="icon-button" aria-label="Close QR dialog"><i data-lucide="x" class="h-4 w-4"></i></button>
+    </div>
+
+    <div class="p-5 sm:p-6 space-y-4">
+      <!-- Intern Mini Card -->
+      <div class="flex items-center gap-3.5 rounded-xl bg-[#faf8ff] p-3.5 border border-line">
+        <img id="qrModalPhoto" src="" alt="" class="hidden h-12 w-12 rounded-xl object-cover ring-1 ring-line">
+        <div id="qrModalInitials" class="grid h-12 w-12 place-items-center rounded-xl bg-[#ede9fe] font-bold text-moss text-[14px]"></div>
+        <div class="min-w-0 flex-1">
+          <h3 id="qrModalName" class="text-[15px] font-extrabold text-ink truncate"></h3>
+          <p id="qrModalRole" class="text-[11px] font-semibold text-moss truncate"></p>
+          <p id="qrModalMeta" class="text-[10px] text-muted font-mono truncate"></p>
+        </div>
+      </div>
+
+      <!-- QR Code Display Box -->
+      <div class="flex flex-col items-center justify-center rounded-2xl bg-white p-6 border-2 border-dashed border-[#ddd6fe]">
+        <div id="modalQrCode" class="rounded-xl bg-white p-3 shadow-md border border-line"></div>
+        <span id="modalQrUrl" class="hidden"></span>
+      </div>
+
+      <!-- Network / Host Switcher for Mobile Phone Scanning -->
+      <div class="rounded-xl bg-[#faf8ff] p-3 border border-[#ddd6fe] flex items-center justify-between gap-2 text-[11px]">
+        <div>
+          <span class="font-bold text-ink block">Mobile Phone Scanning</span>
+          <span class="text-muted text-[10px]" id="qrModalHostDesc">Using browser address</span>
+        </div>
+        <button type="button" id="toggleLanBtn" onclick="toggleQrHostMode()" class="rounded-lg bg-white border border-[#ddd6fe] px-2.5 py-1 font-bold text-moss text-[10px] hover:bg-[#f5f3ff] transition shrink-0">
+          Switch to Wi-Fi IP
+        </button>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="grid grid-cols-2 gap-2 pt-1 sm:grid-cols-3">
+        <button type="button" onclick="copyModalQrLink()" class="rounded-lg border border-line bg-white px-3 py-2 text-[11px] font-bold text-ink hover:bg-[#f5f3ff] inline-flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="copy" class="h-3.5 w-3.5 text-moss"></i>
+          <span>Copy link</span>
+        </button>
+        <button type="button" onclick="downloadModalQrCode()" class="rounded-lg bg-moss px-3 py-2 text-[11px] font-bold text-white hover:bg-[#6d28d9] inline-flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="download" class="h-3.5 w-3.5"></i>
+          <span>Download QR</span>
+        </button>
+        <button type="button" onclick="openModalProfileTab()" class="col-span-2 sm:col-span-1 rounded-lg border border-line bg-white px-3 py-2 text-[11px] font-bold text-moss hover:bg-[#f5f3ff] inline-flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="external-link" class="h-3.5 w-3.5"></i>
+          <span>Open portfolio</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
   <style>
-    .nav-link { flex: 0 0 auto; border: 1px solid transparent; border-radius: 8px; padding: 9px 12px; color: #718078; transition: color .15s, background .15s; }
+    .nav-link { flex: 0 0 auto; border: 1px solid transparent; border-radius: 8px; padding: 9px 12px; color: #7c749b; transition: color .15s, background .15s; }
     .no-scrollbar { scrollbar-width: none; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
-    .nav-link:hover { color: #17211d; background: #e9eee7; }
-    .nav-link.active { color: #305b43; border-color: #d5e2d2; background: #eaf2e8; }
-    .metric { min-width: 0; border: 1px solid #e2e7df; border-radius: 10px; background: white; padding: 14px 13px; }
-    .metric span { display: block; color: #718078; font-size: 9px; font-weight: 700; letter-spacing: .07em; line-height: 1.45; text-transform: uppercase; }
+    .nav-link:hover { color: #1e1b4b; background: #f5f3ff; }
+    .nav-link.active { color: #7c3aed; border-color: #ddd6fe; background: #ede9fe; }
+    .metric { min-width: 0; border: 1px solid #e9d5ff; border-radius: 10px; background: white; padding: 14px 13px; box-shadow: 0 1px 3px 0 rgba(124, 58, 237, 0.04); }
+    .metric span { display: block; color: #7c749b; font-size: 9px; font-weight: 700; letter-spacing: .07em; line-height: 1.45; text-transform: uppercase; }
     .metric strong { display: block; margin-top: 10px; font-size: 25px; font-weight: 800; line-height: 1; letter-spacing: -.03em; }
-    .metric small { display: block; margin-top: 8px; color: #718078; font-size: 9px; font-weight: 500; line-height: 1.4; }
-    .panel { min-width: 0; border: 1px solid #e2e7df; border-radius: 11px; background: white; padding: 18px; }
-    .panel-icon { display: grid; height: 32px; width: 32px; place-items: center; border-radius: 8px; background: #edf3eb; color: #305b43; }
+    .metric small { display: block; margin-top: 8px; color: #7c749b; font-size: 9px; font-weight: 500; line-height: 1.4; }
+    .panel { min-width: 0; border: 1px solid #e9d5ff; border-radius: 11px; background: white; padding: 18px; box-shadow: 0 1px 3px 0 rgba(124, 58, 237, 0.04); }
+    .panel-icon { display: grid; height: 32px; width: 32px; place-items: center; border-radius: 8px; background: #ede9fe; color: #7c3aed; }
     .panel-icon svg { height: 16px; width: 16px; }
-    .field { border: 1px solid #dfe5dc; border-radius: 8px; background: white; padding: 9px 11px; color: #17211d; font-size: 11px; outline: none; }
-    .field:focus { border-color: #75947a; box-shadow: 0 0 0 3px #305b4318; }
-    .action-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 8px; background: #305b43; padding: 10px 13px; color: white; font-size: 11px; font-weight: 700; transition: background .15s; }
-    .action-button:hover { background: #234632; }
-    .score-field { display: grid; grid-template-columns: 1fr auto; gap: 7px 10px; color: #35433a; font-size: 11px; font-weight: 600; }
-    .score-field span { color: #718078; font-family: 'DM Mono', monospace; font-size: 10px; }
-    .score-field input { grid-column: 1 / -1; width: 100%; border: 1px solid #dfe5dc; border-radius: 8px; background: white; padding: 10px; color: #17211d; outline: none; }
-    .score-field input:focus { border-color: #75947a; box-shadow: 0 0 0 3px #305b4318; }
-    .edit-dialog::backdrop { background: rgb(23 33 29 / 45%); }
-    .edit-field { display: grid; gap: 6px; color: #35433a; font-size: 11px; font-weight: 600; }
-    .edit-field input, .edit-field select, .edit-field textarea { width: 100%; border: 1px solid #dfe5dc; border-radius: 8px; background: white; padding: 9px 10px; color: #17211d; font: 400 11px 'DM Sans', sans-serif; outline: none; }
-    .edit-field input:focus, .edit-field select:focus, .edit-field textarea:focus { border-color: #75947a; box-shadow: 0 0 0 3px #305b4318; }
-    .edit-field input[readonly] { background: #f4f6f2; color: #718078; }
+    .field { border: 1px solid #ddd6fe; border-radius: 8px; background: white; padding: 9px 11px; color: #1e1b4b; font-size: 11px; outline: none; }
+    .field:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15); }
+    .action-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 8px; background: #7c3aed; padding: 10px 13px; color: white; font-size: 11px; font-weight: 700; transition: background .15s; }
+    .action-button:hover { background: #6d28d9; }
+    .score-field { display: grid; grid-template-columns: 1fr auto; gap: 7px 10px; color: #2e1065; font-size: 11px; font-weight: 600; }
+    .score-field span { color: #7c749b; font-family: 'DM Mono', monospace; font-size: 10px; }
+    .score-field input { grid-column: 1 / -1; width: 100%; border: 1px solid #ddd6fe; border-radius: 8px; background: white; padding: 10px; color: #1e1b4b; outline: none; }
+    .score-field input:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15); }
+    .edit-dialog::backdrop { background: rgb(30 27 75 / 45%); }
+    .edit-field { display: grid; gap: 6px; color: #2e1065; font-size: 11px; font-weight: 600; }
+    .edit-field input, .edit-field select, .edit-field textarea { width: 100%; border: 1px solid #ddd6fe; border-radius: 8px; background: white; padding: 9px 10px; color: #1e1b4b; font: 400 11px 'DM Sans', sans-serif; outline: none; }
+    .edit-field input:focus, .edit-field select:focus, .edit-field textarea:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15); }
+    .edit-field input[readonly] { background: #faf8ff; color: #7c749b; }
     .edit-field input[type="file"] { padding: 7px; }
-    .icon-button { display: grid; height: 30px; width: 30px; place-items: center; border-radius: 7px; color: #718078; }
-    .icon-button:hover, .cancel-button:hover { background: #f1f4ef; color: #17211d; }
-    .cancel-button { border-radius: 8px; padding: 9px 13px; color: #526159; font-size: 11px; font-weight: 700; }
+    .icon-button { display: grid; height: 30px; width: 30px; place-items: center; border-radius: 7px; color: #7c749b; }
+    .icon-button:hover, .cancel-button:hover { background: #f5f3ff; color: #1e1b4b; }
+    .cancel-button { border-radius: 8px; padding: 9px 13px; color: #5b4a78; font-size: 11px; font-weight: 700; }
     .public-profile-view .site-nav, .public-profile-view .admin-label, .public-profile-view .portfolio-admin-controls { display: none !important; }
     @media (max-width: 640px) {
       .site-header-inner { flex-wrap: wrap; height: auto !important; gap: 0 8px; padding-top: 8px; }
@@ -246,6 +324,9 @@
     let dashboardDomainChart;
     let dashboardGradeChart;
     let qrRenderGeneration = 0;
+    let networkInfo = null;
+    let qrHostMode = 'origin';
+    let activeModalIntern = null;
 
     function loadSavedInterns() {
       try {
@@ -331,6 +412,7 @@
         description: typeof intern.description === 'string' ? intern.description.trim() : '',
         photo: typeof intern.photo === 'string' ? intern.photo.trim() : '',
         qrImage: typeof intern.qrImage === 'string' ? intern.qrImage.trim() : '',
+        github: typeof intern.github === 'string' ? intern.github.trim() : '',
         days: Number(intern.days),
         total: Number(intern.total),
         score: Number(intern.score),
@@ -393,29 +475,172 @@
       return score >= 90 ? 'A+' : score >= 80 ? 'A' : score >= 70 ? 'B' : score >= 60 ? 'C' : score >= 50 ? 'D' : 'E';
     }
 
-    async function getProfileUrl(intern) {
-      const response = await fetch('/api/profile-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: intern.id,
-          name: intern.name,
-          college: intern.college,
-          domain: intern.domain,
-          role: intern.role,
-          score: intern.score,
-          status: intern.status,
-          project: intern.project,
-          description: intern.description,
-          skills: intern.skills,
-          photo: /^https?:\/\//i.test(intern.photo) && intern.photo.length <= 150 ? intern.photo : ''
-        })
-      });
-      if (!response.ok) {
-        throw new Error(`A specific profile link could not be created (HTTP ${response.status}).`);
+    async function fetchNetworkInfo() {
+      try {
+        const response = await fetch('/api/network-info', { cache: 'no-store' });
+        if (response.ok) {
+          networkInfo = await response.json();
+          updateQrHostLabels();
+        }
+      } catch (error) {
+        console.warn('Network info could not be fetched:', error);
       }
-      const result = await response.json();
-      return new URL(result.path, window.location.origin).toString();
+    }
+
+    function getEffectiveBaseUrl() {
+      if (qrHostMode === 'lan' && networkInfo && networkInfo.localIp) {
+        return `http://${networkInfo.localIp}:${networkInfo.port || 3000}`;
+      }
+      return window.location.origin;
+    }
+
+    async function getProfileUrl(intern) {
+      if (!intern || !intern.id) return '';
+      const base = getEffectiveBaseUrl();
+      return new URL(`/profile/${encodeURIComponent(intern.id)}`, base).toString();
+    }
+
+    function downloadQrFromElement(element, filename) {
+      if (!element) return;
+      const canvas = element.querySelector('canvas');
+      if (canvas) {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        return;
+      }
+      const img = element.querySelector('img');
+      if (img && img.src) {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = img.src;
+        link.click();
+      }
+    }
+
+    function copySelectedProfileUrl() {
+      const label = document.getElementById('portfolioQrLabel');
+      const url = label?.dataset?.url || label?.textContent;
+      if (!url) return;
+      navigator.clipboard.writeText(url).then(() => {
+        window.alert('Profile link copied to clipboard!');
+      }).catch(() => {
+        window.prompt('Copy profile link:', url);
+      });
+    }
+
+    function downloadSelectedQrCode() {
+      const intern = interns.find(item => item.id === selectedInternId);
+      const container = document.getElementById('portfolioQr');
+      if (intern && container) {
+        downloadQrFromElement(container, `${intern.id}-portfolio-qr.png`);
+      }
+    }
+
+    function openSelectedProfileTab() {
+      const label = document.getElementById('portfolioQrLabel');
+      const url = label?.dataset?.url || label?.textContent;
+      if (url) window.open(url, '_blank');
+    }
+
+    async function openStudentQrDialog(id) {
+      const intern = interns.find(item => item.id === id);
+      if (!intern) return;
+      activeModalIntern = intern;
+
+      document.getElementById('qrModalName').textContent = intern.name;
+      document.getElementById('qrModalRole').textContent = intern.role;
+      document.getElementById('qrModalMeta').textContent = `${intern.id} · ${intern.domain}`;
+
+      const photo = document.getElementById('qrModalPhoto');
+      const initials = document.getElementById('qrModalInitials');
+      const nameParts = (intern.name || '').trim().split(/\s+/);
+      initials.textContent = nameParts.length > 1 ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase() : (nameParts[0] ? nameParts[0].slice(0, 2).toUpperCase() : 'PS');
+
+      if (intern.photo && isSafePhotoUrl(intern.photo)) {
+        photo.src = intern.photo;
+        photo.classList.remove('hidden');
+        initials.classList.add('hidden');
+      } else {
+        photo.classList.add('hidden');
+        initials.classList.remove('hidden');
+      }
+
+      await updateModalQrCode();
+      updateQrHostLabels();
+      document.getElementById('studentQrDialog').showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeStudentQrDialog() {
+      document.getElementById('studentQrDialog').close();
+    }
+
+    async function updateModalQrCode() {
+      if (!activeModalIntern) return;
+      const container = document.getElementById('modalQrCode');
+      container.replaceChildren();
+      const url = await getProfileUrl(activeModalIntern);
+      document.getElementById('modalQrUrl').textContent = url;
+      try {
+        new QRCode(container, {
+          text: url,
+          width: 200,
+          height: 200,
+          colorDark: '#17211d',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch (err) {
+        console.error('Modal QR generation error:', err);
+        container.textContent = 'QR generation failed';
+      }
+    }
+
+    function toggleQrHostMode() {
+      qrHostMode = qrHostMode === 'lan' ? 'origin' : 'lan';
+      updateQrHostLabels();
+      updateModalQrCode();
+      const currentIntern = interns.find(item => item.id === selectedInternId);
+      if (currentIntern) renderQRCodes(currentIntern);
+    }
+
+    function updateQrHostLabels() {
+      const isLan = qrHostMode === 'lan';
+      const desc = document.getElementById('qrModalHostDesc');
+      const btn = document.getElementById('toggleLanBtn');
+      if (desc) {
+        if (isLan && networkInfo?.localIp) {
+          desc.textContent = `Using Wi-Fi address (http://${networkInfo.localIp}:${networkInfo.port})`;
+        } else {
+          desc.textContent = `Using browser address (${window.location.host})`;
+        }
+      }
+      if (btn) {
+        btn.textContent = isLan ? 'Switch to Localhost' : 'Switch to Wi-Fi IP';
+      }
+    }
+
+    function copyModalQrLink() {
+      const url = document.getElementById('modalQrUrl').textContent;
+      if (!url) return;
+      navigator.clipboard.writeText(url).then(() => {
+        window.alert('Student Profile URL copied to clipboard!');
+      }).catch(() => {
+        window.prompt('Copy Student Profile URL:', url);
+      });
+    }
+
+    function downloadModalQrCode() {
+      if (!activeModalIntern) return;
+      const container = document.getElementById('modalQrCode');
+      downloadQrFromElement(container, `${activeModalIntern.id}-qr-profile.png`);
+    }
+
+    function openModalProfileTab() {
+      const url = document.getElementById('modalQrUrl').textContent;
+      if (url) window.open(url, '_blank');
     }
 
     async function renderQRCodes(intern) {
@@ -423,19 +648,11 @@
       const notice = document.getElementById('qrHostingNotice');
       const label = document.getElementById('portfolioQrLabel');
       const targets = [
-        { element: document.getElementById('portfolioQr'), size: 240 },
+        { element: document.getElementById('portfolioQr'), size: 210 },
         { element: document.getElementById('idcardQr'), size: 176 }
       ];
       targets.forEach(({ element }) => element.replaceChildren());
 
-      if (!['http:', 'https:'].includes(window.location.protocol)) {
-        notice.textContent = 'Open InternHub through its local server to create a specific profile QR.';
-        label.textContent = 'Profile QR unavailable';
-        targets.forEach(({ element }) => {
-          element.textContent = 'Host to enable QR';
-        });
-        return;
-      }
       if (typeof window.QRCode !== 'function') {
         notice.textContent = 'The QR code library is unavailable. Check your internet connection and reload.';
         label.textContent = 'QR unavailable';
@@ -443,17 +660,18 @@
         return;
       }
 
-      notice.textContent = 'This QR opens only this intern’s profile. Anyone with the link can view it. Phone scanning requires a server address reachable from that phone.';
-      label.textContent = `Creating a specific profile link for ${intern.name}…`;
+      label.textContent = `Creating unique profile QR for ${intern.name}…`;
       targets.forEach(({ element }) => { element.textContent = 'Creating profile QR…'; });
       try {
         const url = await getProfileUrl(intern);
         if (generation !== qrRenderGeneration || selectedInternId !== intern.id) return;
-        label.textContent = `Specific profile QR for ${intern.name}`;
+        label.textContent = url;
+        label.dataset.url = url;
+        notice.textContent = 'Scan to open this student\'s live verified profile.';
         targets.forEach(({ element, size }) => {
           element.replaceChildren();
           try {
-            new QRCode(element, { text: url, width: size, height: size, colorDark: '#17211d', colorLight: '#ffffff' });
+            new QRCode(element, { text: url, width: size, height: size, colorDark: '#17211d', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
           } catch (error) {
             console.error('QR code could not be generated.', error);
             element.textContent = 'QR unavailable';
@@ -462,7 +680,7 @@
       } catch (error) {
         if (generation !== qrRenderGeneration) return;
         console.error('Specific intern profile link could not be generated.', error);
-        notice.textContent = 'Could not generate a specific profile link. Confirm the server is running and try reloading.';
+        notice.textContent = 'Could not generate profile link.';
         label.textContent = 'Profile QR unavailable';
         targets.forEach(({ element }) => { element.textContent = 'QR unavailable'; });
       }
@@ -490,6 +708,7 @@
         mentorReview: intern.mentorReview,
         evaluation: intern.evaluation,
         photo: intern.photo,
+        github: intern.github || '',
         project: intern.project,
         description: intern.description,
         skills: intern.skills.join(', '),
@@ -522,6 +741,7 @@
       form.reset();
       Object.entries({
         id: nextInternId(),
+        github: '',
         days: 0,
         total: 90,
         score: 0,
@@ -658,6 +878,7 @@
         mentorReview: String(values.get('mentorReview') || '').trim(),
         evaluation: String(values.get('evaluation') || '').trim(),
         photo,
+        github: String(values.get('github') || '').trim(),
         project: String(values.get('project')).trim(),
         description: String(values.get('description')).trim(),
         skills: String(values.get('skills')).split(',').map(skill => skill.trim()).filter(Boolean)
@@ -753,16 +974,17 @@
       document.getElementById('emptyState').classList.toggle('hidden', list.length > 0);
       document.getElementById('resultCount').textContent = list.length;
       tbody.innerHTML = list.map(intern => `
-        <tr class="transition-colors hover:bg-[#f8faf7]">
-          <td class="px-4 py-3.5"><p class="font-bold text-ink">${escapeHtml(intern.name)}</p><p class="mt-1 font-mono text-[10px] text-moss">${escapeHtml(intern.id)}</p></td>
+        <tr class="transition-colors hover:bg-[#faf8ff]">
+          <td class="px-4 py-3.5"><div class="flex items-center gap-1.5"><p class="font-bold text-ink">${escapeHtml(intern.name)}</p>${intern.github ? `<a href="${escapeHtml(intern.github.startsWith('http://') || intern.github.startsWith('https://') ? intern.github : 'https://github.com/' + intern.github.replace(/^@/, ''))}" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-moss inline-flex items-center" title="GitHub Profile"><i data-lucide="github" class="h-3.5 w-3.5"></i></a>` : ''}</div><p class="mt-1 font-mono text-[10px] text-moss">${escapeHtml(intern.id)}</p></td>
           <td class="px-4 py-3.5"><p class="font-semibold">${escapeHtml(intern.college)}</p><p class="mt-1 text-[10px] text-muted">${escapeHtml(intern.domain)}</p></td>
           <td class="px-4 py-3.5">${escapeHtml(intern.role)}</td>
           <td class="px-4 py-3.5"><p class="font-semibold">${escapeHtml(intern.mentorName || 'Not assigned')}</p><p class="mt-1 font-mono text-[10px] text-muted">${escapeHtml(intern.mentorId)}</p></td>
           <td class="px-4 py-3.5 text-center font-mono text-[11px]">${intern.days}<span class="text-muted"> / ${intern.total}</span></td>
-          <td class="px-4 py-3.5 text-center"><span class="font-mono font-medium">${Number(intern.score).toFixed(1)}</span><span class="ml-1.5 rounded bg-[#edf3eb] px-1.5 py-1 text-[9px] font-bold text-moss">${escapeHtml(intern.grade)}</span></td>
-          <td class="px-4 py-3.5 text-center"><span class="rounded-full ${intern.status === 'COMPLETED' ? 'bg-[#edf3eb] text-moss' : 'bg-[#edf4ee] text-[#377149]'} px-2 py-1 text-[9px] font-bold">${escapeHtml(intern.status)}</span></td>
-          <td class="px-4 py-3.5 text-right"><div class="flex justify-end gap-2"><button type="button" data-action="edit" data-intern-id="${escapeHtml(intern.id)}" class="rounded-md border border-line px-2.5 py-1.5 text-[10px] font-bold text-moss hover:bg-[#edf3eb]">Edit</button><button type="button" data-action="view" data-intern-id="${escapeHtml(intern.id)}" class="rounded-md bg-moss px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-[#234632]">View profile</button><button type="button" data-action="delete" data-intern-id="${escapeHtml(intern.id)}" class="rounded-md border border-rose-200 px-2.5 py-1.5 text-[10px] font-bold text-rose-700 hover:bg-rose-50">Delete</button></div></td>
+          <td class="px-4 py-3.5 text-center"><span class="font-mono font-medium">${Number(intern.score).toFixed(1)}</span><span class="ml-1.5 rounded bg-[#ede9fe] px-1.5 py-1 text-[9px] font-bold text-moss">${escapeHtml(intern.grade)}</span></td>
+          <td class="px-4 py-3.5 text-center"><span class="rounded-full ${intern.status === 'COMPLETED' ? 'bg-[#ede9fe] text-moss' : 'bg-[#f3e8ff] text-[#6d28d9]'} px-2 py-1 text-[9px] font-bold">${escapeHtml(intern.status)}</span></td>
+          <td class="px-4 py-3.5 text-right"><div class="flex justify-end gap-1.5"><button type="button" data-action="qr" data-intern-id="${escapeHtml(intern.id)}" class="rounded-md border border-[#ddd6fe] bg-[#faf8ff] px-2.5 py-1.5 text-[10px] font-bold text-moss hover:bg-[#ede9fe] inline-flex items-center gap-1" title="View & Download Profile QR"><i data-lucide="qr-code" class="h-3.5 w-3.5"></i><span>QR Code</span></button><button type="button" data-action="edit" data-intern-id="${escapeHtml(intern.id)}" class="rounded-md border border-line px-2.5 py-1.5 text-[10px] font-bold text-moss hover:bg-[#f5f3ff]">Edit</button><button type="button" data-action="view" data-intern-id="${escapeHtml(intern.id)}" class="rounded-md bg-moss px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-[#6d28d9]">View</button><button type="button" data-action="delete" data-intern-id="${escapeHtml(intern.id)}" class="rounded-md border border-rose-200 px-2 py-1.5 text-[10px] font-bold text-rose-700 hover:bg-rose-50">Del</button></div></td>
         </tr>`).join('');
+      if (window.lucide) lucide.createIcons();
     }
 
     function filterStudents() {
@@ -806,6 +1028,8 @@
         document.getElementById('idcardPhoto').removeAttribute('src');
         document.getElementById('portfolioQr').replaceChildren();
         document.getElementById('idcardQr').replaceChildren();
+        const portfolioGithub = document.getElementById('portfolioGithub');
+        if (portfolioGithub) portfolioGithub.classList.add('hidden');
         document.getElementById('evaluationInternName').textContent = 'No intern selected';
         document.getElementById('evaluationInternId').textContent = '';
         document.getElementById('evaluatorMentorName').value = '';
@@ -843,7 +1067,19 @@
       document.getElementById('portfolioGrade').textContent = `Grade ${intern.grade} (${gradeDescription(intern.grade)})`;
       document.getElementById('portfolioProject').textContent = intern.project;
       document.getElementById('portfolioDescription').textContent = intern.description;
-      document.getElementById('portfolioSkills').innerHTML = intern.skills.map(skill => `<span class="rounded-md bg-[#edf3eb] px-2.5 py-1.5 text-[10px] font-semibold text-moss">${escapeHtml(skill)}</span>`).join('');
+      document.getElementById('portfolioSkills').innerHTML = intern.skills.map(skill => `<span class="rounded-md bg-[#ede9fe] px-2.5 py-1.5 text-[10px] font-semibold text-moss">${escapeHtml(skill)}</span>`).join('');
+      const portfolioGithub = document.getElementById('portfolioGithub');
+      if (portfolioGithub) {
+        if (intern.github) {
+          const cleanGithub = intern.github.startsWith('http://') || intern.github.startsWith('https://')
+            ? intern.github
+            : `https://github.com/${intern.github.replace(/^@/, '')}`;
+          portfolioGithub.href = cleanGithub;
+          portfolioGithub.classList.remove('hidden');
+        } else {
+          portfolioGithub.classList.add('hidden');
+        }
+      }
       document.getElementById('idcardPhoto').classList.toggle('hidden', !hasPhoto);
       if (hasPhoto) document.getElementById('idcardPhoto').src = intern.photo;
       else document.getElementById('idcardPhoto').removeAttribute('src');
@@ -854,6 +1090,7 @@
       document.getElementById('idcardDomain').textContent = intern.domain;
       document.getElementById('idcardStatus').textContent = intern.status;
       renderQRCodes(intern);
+      if (window.lucide) lucide.createIcons();
     }
 
     function gradeDescription(grade) {
@@ -942,7 +1179,7 @@
     function initCharts() {
       if (!window.Chart) return;
       Chart.defaults.font.family = "'DM Sans', sans-serif";
-      Chart.defaults.color = '#718078';
+      Chart.defaults.color = '#7c749b';
 
       if (dashboardDomainChart) dashboardDomainChart.destroy();
       if (dashboardGradeChart) dashboardGradeChart.destroy();
@@ -954,7 +1191,7 @@
       });
       const domainLabels = Object.keys(domainCounts);
       const domainData = Object.values(domainCounts);
-      const domainColors = ['#305b43', '#719276', '#92a984', '#bdcda9', '#d0b46b', '#c77e62', '#4c6a5d', '#b8c8a8'];
+      const domainColors = ['#7c3aed', '#8b5cf6', '#a78bfa', '#c084fc', '#9333ea', '#6366f1', '#c4b5fd', '#d8b4fe'];
 
       const gradeCounts = { 'A+': 0, A: 0, B: 0, C: 0, D: 0, E: 0 };
       interns.forEach(intern => {
@@ -967,11 +1204,11 @@
       dashboardDomainChart = new Chart(document.getElementById('domainChart'), {
         type: 'bar',
         data: { labels: domainLabels.length ? domainLabels : ['No data'], datasets: [{ data: domainData.length ? domainData : [0], backgroundColor: domainColors, borderRadius: 4, maxBarThickness: 32 }] },
-        options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { displayColors: false } }, scales: { x: { grid: { display: false }, border: { display: false } }, y: { beginAtZero: true, grid: { color: '#edf0eb' }, border: { display: false }, ticks: { stepSize: Math.max(1, Math.ceil(Math.max(...domainData, 1) / 5)) } } } }
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { displayColors: false } }, scales: { x: { grid: { display: false }, border: { display: false } }, y: { beginAtZero: true, grid: { color: '#f3e8ff' }, border: { display: false }, ticks: { stepSize: Math.max(1, Math.ceil(Math.max(...domainData, 1) / 5)) } } } }
       });
       dashboardGradeChart = new Chart(document.getElementById('gradeChart'), {
         type: 'doughnut',
-        data: { labels: gradeLabels, datasets: [{ data: gradeData, backgroundColor: ['#305b43', '#83a385', '#d0b46b', '#c77e62', '#d6c3ad', '#a97070'], borderWidth: 3, borderColor: '#fff', hoverOffset: 4 }] },
+        data: { labels: gradeLabels, datasets: [{ data: gradeData, backgroundColor: ['#7c3aed', '#8b5cf6', '#a78bfa', '#c084fc', '#d8b4fe', '#cbd5e1'], borderWidth: 3, borderColor: '#fff', hoverOffset: 4 }] },
         options: { maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 7, padding: 16, font: { size: 10 } } } } }
       });
     }
@@ -989,6 +1226,10 @@
       document.getElementById('internRows').addEventListener('click', event => {
         const button = event.target.closest('button[data-action]');
         if (!button) return;
+        if (button.dataset.action === 'qr') {
+          openStudentQrDialog(button.dataset.internId);
+          return;
+        }
         if (button.dataset.action === 'delete') {
           deleteIntern(button.dataset.internId);
           return;
@@ -997,6 +1238,7 @@
         if (button.dataset.action === 'edit') openEditIntern();
         if (button.dataset.action === 'view') switchTab('public-portfolio');
       });
+      fetchNetworkInfo();
       renderInterns(interns);
       setSelectOptions();
       renderExecutiveOverview();

@@ -1,5 +1,6 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const dotenv = require('dotenv');
 const express = require('express');
@@ -31,6 +32,7 @@ if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 app.use('/api/interns', express.json({ limit: '20mb' }));
 app.use(express.json({ limit: '10kb' }));
+app.use('/assets', express.static(path.join(__dirname, 'assets'), { maxAge: '7d' }));
 app.use((req, res, next) => {
   res.set({
     'Cache-Control': 'no-store',
@@ -133,9 +135,11 @@ function normalizeInternRecords(records) {
       : null;
     const photo = text('photo', 1_500_000);
     const qrImage = text('qrImage', 1_500_000);
-    if (skills === null || photo === null || qrImage === null) return null;
+    const github = text('github', 250);
+    if (skills === null || photo === null || qrImage === null || github === null) return null;
     if (typeof intern.photo === 'string' && intern.photo.length > 1_500_000) return null;
     if (typeof intern.qrImage === 'string' && intern.qrImage.length > 1_500_000) return null;
+    if (typeof intern.github === 'string' && intern.github.length > 250) return null;
     if (photo && !/^https?:\/\//i.test(photo) && !/^data:image\/(?:jpeg|png|webp);base64,/i.test(photo)) return null;
     if (qrImage && !/^data:image\/(?:jpeg|png|webp);base64,/i.test(qrImage)) return null;
 
@@ -158,6 +162,7 @@ function normalizeInternRecords(records) {
       evaluation: text('evaluation', 2000),
       project: text('project', 160),
       description: text('description', 500),
+      github: github || '',
       photo,
       qrImage,
       skills,
@@ -227,6 +232,18 @@ function readProfileToken(token) {
   }
 }
 
+function getLocalNetworkIp() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name] || []) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return '127.0.0.1';
+}
+
 function normalizePublicProfile(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
   const stringField = (key, limit) => typeof input[key] === 'string' ? input[key].trim().slice(0, limit) : '';
@@ -239,21 +256,53 @@ function normalizePublicProfile(input) {
 
   if (!id || !name || !college || !domain || !role || !Number.isFinite(score) || score < 0 || score > 100) return null;
 
-  const photo = stringField('photo', 150);
+  const photo = stringField('photo', 1_500_000);
   let safePhoto = '';
   if (photo) {
-    try {
-      if (['http:', 'https:'].includes(new URL(photo).protocol)) safePhoto = photo;
-    } catch {
-      safePhoto = '';
+    if (/^data:image\/(?:jpeg|png|webp);base64,/i.test(photo)) {
+      safePhoto = photo;
+    } else {
+      try {
+        if (['http:', 'https:'].includes(new URL(photo).protocol)) safePhoto = photo;
+      } catch {
+        safePhoto = '';
+      }
     }
   }
 
+  const qrImage = stringField('qrImage', 1_500_000);
+  const safeQrImage = /^data:image\/(?:jpeg|png|webp);base64,/i.test(qrImage) ? qrImage : '';
+
   const skills = Array.isArray(input.skills)
-    ? input.skills.filter(skill => typeof skill === 'string').slice(0, 12).map(skill => skill.trim().slice(0, 60)).filter(Boolean)
+    ? input.skills.filter(skill => typeof skill === 'string').slice(0, 20).map(skill => skill.trim().slice(0, 60)).filter(Boolean)
     : [];
   const roundedScore = Math.round(score * 10) / 10;
   const grade = roundedScore >= 90 ? 'A+' : roundedScore >= 80 ? 'A' : roundedScore >= 70 ? 'B' : roundedScore >= 60 ? 'C' : roundedScore >= 50 ? 'D' : 'E';
+
+  const marksInput = input.marks && typeof input.marks === 'object' ? input.marks : {};
+  const categories = ['technical', 'projectQuality', 'problemSolving', 'taskCompletion', 'communication', 'teamwork'];
+  const marks = {};
+  for (const cat of categories) {
+    const mark = Number(marksInput[cat] ?? roundedScore);
+    marks[cat] = Number.isFinite(mark) && mark >= 0 && mark <= 100 ? mark : roundedScore;
+  }
+
+  const days = Number.isInteger(Number(input.days)) && Number(input.days) >= 0 ? Number(input.days) : 0;
+  const total = Number.isInteger(Number(input.total)) && Number(input.total) >= 1 ? Number(input.total) : 90;
+
+  const rawGithub = stringField('github', 250);
+  let safeGithub = '';
+  if (rawGithub) {
+    const cleanGithub = rawGithub.startsWith('http://') || rawGithub.startsWith('https://') 
+      ? rawGithub 
+      : `https://github.com/${rawGithub.replace(/^@/, '')}`;
+    try {
+      const parsed = new URL(cleanGithub);
+      if (['http:', 'https:'].includes(parsed.protocol)) safeGithub = parsed.href;
+    } catch {
+      safeGithub = '';
+    }
+  }
 
   return {
     id,
@@ -261,14 +310,50 @@ function normalizePublicProfile(input) {
     college,
     domain,
     role,
+    days,
+    total,
     score: roundedScore,
     grade,
     status: input.status === 'COMPLETED' ? 'COMPLETED' : 'ACTIVE',
+    mentorName: stringField('mentorName', 100),
+    mentorId: stringField('mentorId', 100),
+    mentorReview: stringField('mentorReview', 2000),
+    evaluation: stringField('evaluation', 2000),
     project: stringField('project', 160),
     description: stringField('description', 500),
+    github: safeGithub,
     skills,
-    photo: safePhoto
+    marks,
+    photo: safePhoto,
+    qrImage: safeQrImage
   };
+}
+
+async function findPublicProfile(identifier) {
+  if (typeof identifier !== 'string') return null;
+  const decoded = decodeURIComponent(identifier).trim();
+  if (!decoded) return null;
+
+  // 1. Try finding by student ID in dataset
+  try {
+    const dataset = await readInternDataset();
+    if (Array.isArray(dataset)) {
+      const intern = dataset.find(item => item.id.toLowerCase() === decoded.toLowerCase());
+      if (intern) {
+        return normalizePublicProfile(intern);
+      }
+    }
+  } catch (error) {
+    console.error('Could not query dataset for public profile.', error);
+  }
+
+  // 2. Fall back to signed profile token
+  const tokenProfile = readProfileToken(decoded);
+  if (tokenProfile) {
+    return normalizePublicProfile(tokenProfile);
+  }
+
+  return null;
 }
 
 const loginLimiter = rateLimit({
@@ -344,27 +429,42 @@ app.put('/api/interns', requireAdminApi, async (req, res, next) => {
   }
 });
 
+app.get('/api/network-info', (_req, res) => {
+  const localIp = getLocalNetworkIp();
+  res.json({
+    localIp,
+    port,
+    baseUrl: process.env.PUBLIC_BASE_URL || `http://${localIp}:${port}`
+  });
+});
+
 app.post('/api/profile-link', requireAdmin, (req, res) => {
   const profile = normalizePublicProfile(req.body);
   if (!profile) {
     res.status(400).json({ error: 'A valid intern profile is required to generate its QR link.' });
     return;
   }
-  res.json({ path: `/profile/${createProfileToken(profile)}` });
+  const token = createProfileToken(profile);
+  res.json({
+    path: `/profile/${encodeURIComponent(profile.id)}`,
+    tokenPath: `/profile/${token}`,
+    id: profile.id
+  });
 });
 
-app.get('/profile/:token', (req, res) => {
-  if (!readProfileToken(req.params.token)) {
-    res.status(404).send('This intern profile link is invalid.');
+app.get('/profile/:identifier', async (req, res) => {
+  const profile = await findPublicProfile(req.params.identifier);
+  if (!profile) {
+    res.status(404).send('This intern profile link is invalid or unavailable.');
     return;
   }
   res.sendFile(path.join(__dirname, 'profile.html'));
 });
 
-app.get('/api/public-profile/:token', (req, res) => {
-  const profile = readProfileToken(req.params.token);
+app.get('/api/public-profile/:identifier', async (req, res) => {
+  const profile = await findPublicProfile(req.params.identifier);
   if (!profile) {
-    res.status(404).json({ error: 'This intern profile link is invalid.' });
+    res.status(404).json({ error: 'This intern profile link is invalid or unavailable.' });
     return;
   }
   res.json(profile);
