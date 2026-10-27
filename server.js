@@ -9,6 +9,13 @@ const session = require('express-session');
 
 dotenv.config();
 
+const {
+  isSupabaseConfigured,
+  fetchAllInternsFromSupabase,
+  syncInternsToSupabase,
+  fetchSingleInternFromSupabase
+} = require('./supabaseClient');
+
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME?.trim();
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH?.trim();
 const SESSION_SECRET = process.env.SESSION_SECRET?.trim();
@@ -182,7 +189,7 @@ function normalizeInternRecords(records) {
   return normalized;
 }
 
-async function readInternDataset() {
+async function readLocalInternDataset() {
   try {
     const raw = await fs.promises.readFile(internsFile, 'utf8');
     let data = null;
@@ -199,7 +206,7 @@ async function readInternDataset() {
         const seedData = JSON.parse(seedRaw);
         records = normalizeInternRecords(seedData.students);
         if (records && records.length > 0) {
-          await writeInternDataset(records);
+          await writeLocalInternDataset(records);
           console.log(`[InternHub] Successfully recovered dataset from seed with ${records.length} records.`);
         }
       } catch (recoveryErr) {
@@ -215,7 +222,7 @@ async function readInternDataset() {
         const seedData = JSON.parse(seedRaw);
         const seedRecords = normalizeInternRecords(seedData.students);
         if (seedRecords && seedRecords.length > 0) {
-          await writeInternDataset(seedRecords);
+          await writeLocalInternDataset(seedRecords);
           console.log(`[InternHub] Auto-initialized dataset from seed with ${seedRecords.length} records.`);
           return seedRecords;
         }
@@ -232,7 +239,7 @@ async function readInternDataset() {
 
 let datasetWriteQueue = Promise.resolve();
 
-function writeInternDataset(records) {
+function writeLocalInternDataset(records) {
   const save = async () => {
     await fs.promises.mkdir(dataDirectory, { recursive: true });
     const temporaryFile = `${internsFile}.${process.pid}.${crypto.randomBytes(6).toString('hex')}.tmp`;
@@ -249,9 +256,58 @@ function writeInternDataset(records) {
 
   const result = datasetWriteQueue.then(save);
   datasetWriteQueue = result.catch(error => {
-    console.error('Intern dataset could not be saved.', error);
+    console.error('Intern dataset could not be saved locally.', error);
   });
   return result;
+}
+
+async function readInternDataset() {
+  // 1. If Supabase is configured, read from Supabase as primary database
+  if (isSupabaseConfigured()) {
+    try {
+      const supabaseRecords = await fetchAllInternsFromSupabase();
+      if (Array.isArray(supabaseRecords) && supabaseRecords.length > 0) {
+        const normalized = normalizeInternRecords(supabaseRecords);
+        if (normalized && normalized.length > 0) {
+          // Asynchronously update local file as cache/backup
+          writeLocalInternDataset(normalized).catch(() => {});
+          return normalized;
+        }
+      } else if (Array.isArray(supabaseRecords) && supabaseRecords.length === 0) {
+        // Supabase table is empty; auto-seed from local data
+        console.log('[InternHub] Supabase table "interns" is empty. Auto-seeding existing records...');
+        const localRecords = await readLocalInternDataset();
+        if (localRecords && localRecords.length > 0) {
+          await syncInternsToSupabase(localRecords).catch(e => {
+            console.warn('[InternHub] Auto-seed to Supabase notice:', e.message);
+          });
+          return localRecords;
+        }
+      }
+    } catch (supabaseError) {
+      console.warn('[InternHub] Supabase read failed, falling back to local file:', supabaseError.message);
+    }
+  }
+
+  // 2. Fall back to local file storage
+  return await readLocalInternDataset();
+}
+
+async function writeInternDataset(records) {
+  // Always persist locally first so data is never lost
+  const localResult = await writeLocalInternDataset(records);
+
+  // Sync with Supabase if configured
+  if (isSupabaseConfigured()) {
+    try {
+      await syncInternsToSupabase(records);
+      console.log(`[InternHub] Successfully synchronized ${records.length} records to Supabase.`);
+    } catch (supabaseError) {
+      console.error('[InternHub] Supabase synchronization failed:', supabaseError.message);
+    }
+  }
+
+  return localResult;
 }
 
 function createProfileToken(profile) {
@@ -380,7 +436,19 @@ async function findPublicProfile(identifier) {
   const decoded = decodeURIComponent(identifier).trim();
   if (!decoded) return null;
 
-  // 1. Try finding by student ID in dataset
+  // 1. Try finding directly from Supabase if configured
+  if (isSupabaseConfigured()) {
+    try {
+      const intern = await fetchSingleInternFromSupabase(decoded);
+      if (intern) {
+        return normalizePublicProfile(intern);
+      }
+    } catch (err) {
+      console.warn('[InternHub] Supabase profile lookup notice:', err.message);
+    }
+  }
+
+  // 2. Try finding by student ID in dataset
   try {
     const dataset = await readInternDataset();
     if (Array.isArray(dataset)) {
@@ -541,6 +609,11 @@ app.use((error, _req, res, _next) => {
 
 app.listen(port, host, async () => {
   console.log(`InternHub is listening on ${host}:${port}`);
+  if (isSupabaseConfigured()) {
+    console.log('[InternHub] Supabase Database Mode: ACTIVE');
+  } else {
+    console.log('[InternHub] Local Storage Mode (configure SUPABASE_URL in .env to connect Supabase)');
+  }
   try {
     const records = await readInternDataset();
     if (records) {

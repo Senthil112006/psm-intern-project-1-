@@ -24,6 +24,29 @@ Intern records are saved in the server-side `data/interns.json` dataset and shar
 
 Intern records support manually editable unique IDs, mentor names and IDs, mentor review and evaluation notes, and saved marks for each weighted grading category. The overall score and grade are calculated from the saved marks.
 
+## Supabase Database Integration
+
+InternHub supports **Supabase PostgreSQL** as the cloud database for persistent multi-device storage and verified public profile lookups.
+
+### 1. Configure Credentials
+In your local `.env` file (and in your cloud host environment variables):
+```env
+SUPABASE_URL=https://<your-project-id>.supabase.co
+SUPABASE_KEY=sb_publishable_zdV9XXm7ENIx3JFH9UISTA_Dl1-LOeA
+```
+
+### 2. Create Database Table
+1. Open your project in the [Supabase Dashboard](https://supabase.com/dashboard).
+2. Go to **SQL Editor** -> **New query**.
+3. Copy and run the SQL from [supabase-schema.sql](file:///c:/Users/MRasu/OneDrive/Desktop/inter%20hub/supabase-schema.sql).
+
+### 3. Sync Existing Student Cohort to Supabase
+Run the sync command in terminal to migrate all student records:
+```bash
+npm run db:sync
+```
+When running, the server automatically uses Supabase for reading, updating, and public profile lookups, with local file caching as an offline fallback.
+
 ## Intern-specific profile QR codes
 
 The Portfolio and ID card QR codes are generated as signed links to one intern's standalone public profile. The QR does not open the admin dashboard or provide access to the intern directory. Anyone with a profile link can view that profile, so share it only as appropriate. Older imported QR images are ignored; the app generates a specific profile QR instead.
