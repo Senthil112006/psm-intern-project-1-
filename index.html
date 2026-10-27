@@ -417,25 +417,10 @@
         }
       }
 
-      // 2. Check localStorage
-      try {
-        const saved = localStorage.getItem('psm-internhub-interns');
-        const parsed = saved ? JSON.parse(saved) : null;
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const normalized = parsed.map(normalizeInternRecord).filter(Boolean);
-          if (normalized.length === parsed.length && new Set(normalized.map(i => i.id)).size === normalized.length) {
-            interns = normalized;
-            datasetReady = true;
-            selectedInternId = interns.some(intern => intern.id === selectedInternId) ? selectedInternId : (interns[0]?.id ?? null);
-            return;
-          }
-        }
-      } catch (lsErr) {}
-
-      // 3. Static host fallback: fetch seed data relative to current location
+      // 2. Fetch latest seed data relative to current location
       try {
         const seedUrl = new URL('data/seed-interns.json', window.location.href).href;
-        const staticResponse = await fetch(seedUrl);
+        const staticResponse = await fetch(seedUrl, { cache: 'no-store' });
         if (staticResponse.ok) {
           const seedData = await staticResponse.json();
           if (Array.isArray(seedData.students)) {
@@ -452,6 +437,21 @@
           }
         }
       } catch (staticErr) {}
+
+      // 3. Fallback to localStorage if seed fetch failed
+      try {
+        const saved = localStorage.getItem('psm-internhub-interns');
+        const parsed = saved ? JSON.parse(saved) : null;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const normalized = parsed.map(normalizeInternRecord).filter(Boolean);
+          if (normalized.length === parsed.length && new Set(normalized.map(i => i.id)).size === normalized.length) {
+            interns = normalized;
+            datasetReady = true;
+            selectedInternId = interns.some(intern => intern.id === selectedInternId) ? selectedInternId : (interns[0]?.id ?? null);
+            return;
+          }
+        }
+      } catch (lsErr) {}
 
       // 4. Default fallback
       interns = defaultInterns.map(intern => normalizeInternRecord({ ...intern, skills: [...intern.skills] }));

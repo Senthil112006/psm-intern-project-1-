@@ -345,28 +345,28 @@
         }
       }
 
-      // 3. Fallback to localStorage or bundled seed data (e.g. on GitHub Pages)
+      // 3. Fallback to bundled seed data or localStorage (e.g. on GitHub Pages)
       if (!profile) {
         let studentsList = [];
         try {
-          const saved = localStorage.getItem('psm-internhub-interns');
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) studentsList = parsed;
+          const seedUrl = isStaticHost
+            ? new URL('data/seed-interns.json', window.location.href).href
+            : '/data/seed-interns.json';
+          const res = await fetch(seedUrl, { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.students)) studentsList = data.students;
           }
-        } catch (lsErr) {}
+        } catch (seedErr) {}
 
         if (studentsList.length === 0) {
           try {
-            const seedUrl = isStaticHost
-              ? new URL('data/seed-interns.json', window.location.href).href
-              : '/data/seed-interns.json';
-            const res = await fetch(seedUrl);
-            if (res.ok) {
-              const data = await res.json();
-              if (Array.isArray(data.students)) studentsList = data.students;
+            const saved = localStorage.getItem('psm-internhub-interns');
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed) && parsed.length > 0) studentsList = parsed;
             }
-          } catch (seedErr) {}
+          } catch (lsErr) {}
         }
 
         if (studentsList.length > 0) {

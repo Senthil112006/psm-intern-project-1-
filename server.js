@@ -38,6 +38,12 @@ app.use(express.json({ limit: '10kb' }));
 app.use(['/assets', '/profile/assets'], express.static(path.join(__dirname, 'assets'), { maxAge: '7d' }));
 app.use(['/data', '/profile/data'], express.static(path.join(__dirname, 'data')));
 app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
   res.set({
     'Cache-Control': 'no-store',
     'X-Content-Type-Options': 'nosniff',
@@ -450,6 +456,15 @@ app.post('/logout', requireAdmin, (req, res, next) => {
 app.get('/api/interns', requireAdminApi, async (_req, res, next) => {
   try {
     res.json({ students: await readInternDataset() });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/public-interns', async (_req, res, next) => {
+  try {
+    const records = await readInternDataset();
+    res.json({ students: records || [] });
   } catch (error) {
     next(error);
   }
