@@ -9,7 +9,9 @@ const session = require('express-session');
 
 dotenv.config();
 
-const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH, SESSION_SECRET } = process.env;
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME?.trim();
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH?.trim();
+const SESSION_SECRET = process.env.SESSION_SECRET?.trim();
 const passwordHashParts = ADMIN_PASSWORD_HASH?.split(':') ?? [];
 const validPasswordHash = passwordHashParts.length === 2 &&
   /^[a-f0-9]{32}$/i.test(passwordHashParts[0]) &&
@@ -33,7 +35,8 @@ if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 app.use('/api/interns', express.json({ limit: '20mb' }));
 app.use(express.json({ limit: '10kb' }));
-app.use('/assets', express.static(path.join(__dirname, 'assets'), { maxAge: '7d' }));
+app.use(['/assets', '/profile/assets'], express.static(path.join(__dirname, 'assets'), { maxAge: '7d' }));
+app.use(['/data', '/profile/data'], express.static(path.join(__dirname, 'data')));
 app.use((req, res, next) => {
   res.set({
     'Cache-Control': 'no-store',
@@ -175,8 +178,28 @@ function normalizeInternRecords(records) {
 
 async function readInternDataset() {
   try {
-    const data = JSON.parse(await fs.promises.readFile(internsFile, 'utf8'));
-    const records = normalizeInternRecords(data.students);
+    const raw = await fs.promises.readFile(internsFile, 'utf8');
+    let data = null;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = null;
+    }
+    let records = data ? normalizeInternRecords(data.students) : null;
+    if (!records) {
+      console.warn('[InternHub] Persisted dataset missing or invalid. Attempting recovery from seed...');
+      try {
+        const seedRaw = await fs.promises.readFile(seedInternsFile, 'utf8');
+        const seedData = JSON.parse(seedRaw);
+        records = normalizeInternRecords(seedData.students);
+        if (records && records.length > 0) {
+          await writeInternDataset(records);
+          console.log(`[InternHub] Successfully recovered dataset from seed with ${records.length} records.`);
+        }
+      } catch (recoveryErr) {
+        console.warn('[InternHub] Recovery from seed failed:', recoveryErr.message);
+      }
+    }
     if (!records) throw new Error('The persisted intern dataset has an invalid format.');
     return records;
   } catch (error) {
@@ -468,6 +491,8 @@ app.post('/api/profile-link', requireAdmin, (req, res) => {
     id: profile.id
   });
 });
+
+app.get(['/profile', '/profile/'], (_req, res) => res.redirect('/'));
 
 app.get('/profile/:identifier', async (req, res) => {
   const profile = await findPublicProfile(req.params.identifier);
