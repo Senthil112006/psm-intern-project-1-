@@ -9,6 +9,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -343,9 +344,27 @@
       return defaultInterns.map(intern => normalizeInternRecord({ ...intern, skills: [...intern.skills] }));
     }
 
+    const SUPABASE_CONFIG = {
+      url: 'https://afibahcsjcknqjcyzdty.supabase.co',
+      key: 'sb_publishable_zdV9XXm7ENIx3JFH9UISTA_Dl1-LOeA'
+    };
+
+    function getSupabaseBrowserClient() {
+      if (window.supabase && SUPABASE_CONFIG.url && SUPABASE_CONFIG.key) {
+        try {
+          return window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+        } catch (e) {
+          console.warn('Supabase client creation error:', e);
+        }
+      }
+      return null;
+    }
+
     async function persistInterns(records, allowInitialLoad = false) {
       if (!datasetReady && !allowInitialLoad) return false;
       const isStaticHost = window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
+      
+      // 1. Persist through backend Express API if running with server
       if (!isStaticHost) {
         try {
           const response = await fetch('/api/interns', {
@@ -367,8 +386,44 @@
             }
           }
         } catch (error) {
-          // Continue to localStorage fallback
+          // Continue to direct Supabase and localStorage fallback
         }
+      }
+
+      // 2. Persist directly to Supabase cloud database
+      const sbClient = getSupabaseBrowserClient();
+      if (sbClient) {
+        try {
+          const rows = records.map(r => ({
+            id: r.id,
+            name: r.name,
+            college: r.college,
+            domain: r.domain,
+            role: r.role,
+            days: r.days,
+            total: r.total,
+            score: r.score,
+            grade: r.grade || '',
+            status: r.status === 'COMPLETED' ? 'COMPLETED' : 'ACTIVE',
+            mentorName: r.mentorName || '',
+            mentorId: r.mentorId || '',
+            mentorReview: r.mentorReview || '',
+            evaluation: r.evaluation || '',
+            project: r.project || '',
+            description: r.description || '',
+            github: r.github || '',
+            photo: r.photo || '',
+            qrImage: r.qrImage || '',
+            skills: r.skills || [],
+            marks: r.marks || {},
+            updated_at: new Date().toISOString()
+          }));
+          sbClient.from('interns').upsert(rows, { onConflict: 'id' }).then(() => {
+            console.log(`[Supabase] Live sync completed (${rows.length} records saved to Supabase).`);
+          }).catch(sbErr => {
+            console.warn('[Supabase] Live sync warning:', sbErr);
+          });
+        } catch (e) {}
       }
 
       try {
@@ -413,7 +468,28 @@
             return;
           }
         } catch (apiErr) {
-          // Backend API is not available
+          // Fall through to direct Supabase query
+        }
+      }
+
+      // 2. Fetch directly from Supabase cloud database
+      const sbClient = getSupabaseBrowserClient();
+      if (sbClient) {
+        try {
+          const { data, error } = await sbClient.from('interns').select('*').order('id');
+          if (!error && Array.isArray(data) && data.length > 0) {
+            const normalized = data.map(normalizeInternRecord).filter(Boolean);
+            if (normalized.length > 0) {
+              interns = normalized;
+              datasetReady = true;
+              try { localStorage.setItem('psm-internhub-interns', JSON.stringify(interns)); } catch (e) {}
+              selectedInternId = interns.some(intern => intern.id === selectedInternId) ? selectedInternId : (interns[0]?.id ?? null);
+              console.log(`[Supabase] Loaded ${interns.length} live records directly from Supabase.`);
+              return;
+            }
+          }
+        } catch (sbLoadErr) {
+          console.warn('[Supabase] Direct load notice:', sbLoadErr);
         }
       }
 

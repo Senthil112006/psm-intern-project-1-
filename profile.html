@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -341,11 +342,30 @@
             profile = await response.json();
           }
         } catch (apiErr) {
-          // Fall through to static fallback
+          // Fall through to direct Supabase query
         }
       }
 
-      // 3. Fallback to bundled seed data or localStorage (e.g. on GitHub Pages)
+      // 3. Try fetching directly from Supabase cloud database
+      if (!profile && identifier && window.supabase) {
+        try {
+          const sbClient = window.supabase.createClient('https://afibahcsjcknqjcyzdty.supabase.co', 'sb_publishable_zdV9XXm7ENIx3JFH9UISTA_Dl1-LOeA');
+          const { data, error } = await sbClient.from('interns').select('*').ilike('id', identifier).maybeSingle();
+          if (!error && data) {
+            profile = {
+              ...data,
+              mentorName: data.mentorName || data.mentor_name || '',
+              mentorId: data.mentorId || data.mentor_id || '',
+              mentorReview: data.mentorReview || data.mentor_review || '',
+              qrImage: data.qrImage || data.qr_image || ''
+            };
+          }
+        } catch (sbErr) {
+          console.warn('[Supabase] Public profile direct load notice:', sbErr);
+        }
+      }
+
+      // 4. Fallback to bundled seed data or localStorage (e.g. on GitHub Pages)
       if (!profile) {
         let studentsList = [];
         try {
